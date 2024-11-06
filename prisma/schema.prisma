@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//Oauth
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  email    String  @unique
+  password String?
+  agency   String
+  tel      String
+
+  basket Basket[]
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) //บันทึกเวลาเมื่อเพื่ม Admin เข้ามาใหม่
+  updatedAt DateTime @updatedAt //บันทึกเวลาเมื่อแก้ไข Admin 
+
+  levelId Int
+  level   Leveladmin @relation(fields: [levelId], references: [id])
+}
+
+model Leveladmin {
+  id        Int     @id @default(autoincrement())
+  levelname String  @unique
+  admins    Admin[]
+}
+
+model Product {
+  id                  Int       @id @default(autoincrement())
+  productname         String
+  serialnumber        String
+  serialproduct       String?
+  contract_start_date DateTime?
+  contract_end_date   DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  images     Image[]
+  // 1 Product มีได้หลาย Image
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], map: "Product_Category_fkey")
+
+  borrowStatus Borrow_Status?
+
+  product_brandId Int
+  product_brand   Product_Brand @relation(fields: [product_brandId], references: [id], map: "Product_Brand_fkey", onDelete: Cascade)
+
+  product_modelId Int
+  product_model   Product_Model @relation(fields: [product_modelId], references: [id], map: "Product_Model_fkey", onDelete: Cascade)
+
+  basketId Int?
+  basket   Basket? @relation(fields: [basketId], references: [id], map: "Basket_fkey", onDelete: SetNull)
+}
+
+model Image {
+  id        Int     @id @default(autoincrement())
+  asset_id  String
+  public_id String
+  filename  String
+  path      String
+  productId Int
+  products  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Product_Brand {
+  id         Int      @id @default(autoincrement())
+  brand_name String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  models   Product_Model[]
+  products Product[]
+}
+
+model Product_Model {
+  id         Int      @id @default(autoincrement())
+  model_name String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  brand    Product_Brand @relation(fields: [brandId], references: [id], map: "Product_Model_Brand_fkey")
+  brandId  Int
+  products Product[]
+}
+
+model Category {
+  id            Int      @id @default(autoincrement())
+  category_name String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products Product[]
+}
+
+model Borrow_Status {
+  id            Int     @id @default(autoincrement())
+  borrow_status Boolean @default(false)
+
+  productId Int     @unique // one-two-one 
+  products  Product @relation(fields: [productId], references: [id], onDelete: Cascade, map: "Product_fkey")
+}
+
+model Basket {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  products Product[]
+
+  order Order?
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  basketId  Int        @unique
+  basket    Basket     @relation(fields: [basketId], references: [id])
+  order_key Order_key?
+}
+
+model Order_key {
+  id        Int      @id @default(autoincrement())
+  keyValue  String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  orderId Int   @unique
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
