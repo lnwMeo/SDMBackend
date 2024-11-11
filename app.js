@@ -10,6 +10,7 @@ const cors = require("cors");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use('/assets', express.static('assets'));
 
 readdirSync("./router").map((c) => app.use("/api", require("./router/" + c)));
 

@@ -68,6 +68,8 @@ model Product {
 
   basketId Int?
   basket   Basket? @relation(fields: [basketId], references: [id], map: "Basket_fkey", onDelete: SetNull)
+
+  stockProductStatus Boolean   @default(true) // true = in stock, false = borrowed
 }
 
 model Image {
