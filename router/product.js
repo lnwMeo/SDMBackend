@@ -19,6 +19,9 @@ const {
   updateProduct,
   removeProduct,
   listProduct,
+  productincard,
+  listProductByCategory,
+  listProductBySearch,
 } = require("../controllers/product_controllers");
 
 // ENDPOINT
@@ -26,9 +29,10 @@ router.post("/createProduct", upload.array("images", 6), createProduct);
 router.put("/updateProduct/:id", upload.array("images", 6), updateProduct);
 router.delete("/deleteProduct/:id", removeProduct);
 router.get("/listProduct", listProduct);
-
+router.get("/productincard", productincard);
+router.get("/listProductByCategory/:categoryId", listProductByCategory);
+router.get("/listProductBySearch", listProductBySearch);
 
 // router.use('/assets', express.static('assets'));
-
 
 module.exports = router;

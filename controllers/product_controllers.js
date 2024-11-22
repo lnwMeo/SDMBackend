@@ -16,8 +16,6 @@ exports.createProduct = async (req, res) => {
       product_brandId,
       product_modelId,
       basketId,
-      asset_id,
-      public_id,
     } = req.body;
 
     const borrowStatusBoolean = borrowStatus === "true";
@@ -37,8 +35,6 @@ exports.createProduct = async (req, res) => {
 
     const images = req.files
       ? req.files.map((file) => ({
-          asset_id: asset_id || "default_asset_id", // ตรวจสอบว่า asset_id ถูกส่งใน req.files
-          public_id: public_id || "default_pubilc_id",
           filename: file.filename,
           path: `assets/product/${file.filename}`,
         }))
@@ -99,8 +95,6 @@ exports.updateProduct = async (req, res) => {
       product_brandId,
       product_modelId,
       basketId,
-      asset_id,
-      public_id,
     } = req.body;
 
     // const borrowStatusBoolean = borrowStatus === "true";
@@ -141,8 +135,6 @@ exports.updateProduct = async (req, res) => {
     // จัดการไฟล์รูปภาพถ้ามีการอัปโหลดไฟล์
     const images = req.files
       ? req.files.map((file) => ({
-          asset_id: asset_id || "default_asset_id",
-          public_id: public_id || "default_public_id",
           filename: file.filename,
           path: `assets/product/${file.filename}`,
         }))
@@ -213,6 +205,85 @@ exports.listProduct = async (req, res) => {
       },
     });
     res.send(product);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error!!!" });
+  }
+};
+
+exports.productincard = async (req, res) => {
+  try {
+    const product = await prisma.product.findMany({
+      include: {
+        images: true,
+        category: true,
+      },
+    });
+
+    const productincard = product.map((product) => ({
+      id: product.id,
+      productname: product.productname,
+      category_name: product.category.category_name, // แก้ไขส่วนนี้
+      first_image: product.images,
+    }));
+
+    res.send(productincard);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error!!!" });
+  }
+};
+
+exports.listProductByCategory = async (req, res) => {
+  const { categoryId } = req.params;
+  try {
+    const product = await prisma.product.findMany({
+      where: {
+        categoryId: parseInt(categoryId),
+      },
+      include: {
+        images: true,
+        category: true,
+      },
+    });
+
+    const listproductbycategory = product.map((product) => ({
+      id: product.id,
+      productname: product.productname,
+      category_name: product.category.category_name, // แก้ไขส่วนนี้
+      first_image: product.images,
+    }));
+    res.send(listproductbycategory);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error!!!" });
+  }
+};
+
+exports.listProductBySearch = async (req, res) => {
+  const { keyword } = req.query;
+  try {
+    const product = await prisma.product.findMany({
+      where: {
+        productname: keyword
+          ? {
+            contains: keyword.toLowerCase(),
+            }
+          : undefined,
+      },
+      include: {
+        images: true,
+        category: true,
+      },
+    });
+
+    const SearchProduct = product.map((product) => ({
+      id: product.id,
+      productname: product.productname,
+      category_name: product.category.category_name, // แก้ไขส่วนนี้
+      first_image: product.images,
+    }));
+    res.send(SearchProduct);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server Error!!!" });

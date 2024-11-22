@@ -24,6 +24,26 @@ exports.listCategory = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category_name } = req.body;
+    const category = await prisma.category.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        category_name,
+      },
+    });
+    res.send(category);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.removeCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -34,7 +54,7 @@ exports.removeCategory = async (req, res) => {
     });
     res.send(category);
   } catch (err) {
-    console.log(err)
-    res.status(500).json({message:"Server Error"})
+    console.log(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };

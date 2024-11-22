@@ -22,7 +22,7 @@ model User {
   agency   String
   tel      String
 
-  basket Basket[]
+  orders Order[]
 }
 
 model Admin {
@@ -58,6 +58,9 @@ model Product {
   categoryId Int
   category   Category @relation(fields: [categoryId], references: [id], map: "Product_Category_fkey")
 
+  orderId Int? // 1 Product อยู่ได้ใน 1 Order
+  order   Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
   borrowStatus Borrow_Status?
 
   product_brandId Int
@@ -66,16 +69,11 @@ model Product {
   product_modelId Int
   product_model   Product_Model @relation(fields: [product_modelId], references: [id], map: "Product_Model_fkey", onDelete: Cascade)
 
-  basketId Int?
-  basket   Basket? @relation(fields: [basketId], references: [id], map: "Basket_fkey", onDelete: SetNull)
-
-  stockProductStatus Boolean   @default(true) // true = in stock, false = borrowed
+  stockProductStatus Boolean @default(true) // true = in stock, false = borrowed
 }
 
 model Image {
   id        Int     @id @default(autoincrement())
-  asset_id  String
-  public_id String
   filename  String
   path      String
   productId Int
@@ -120,26 +118,22 @@ model Borrow_Status {
   products  Product @relation(fields: [productId], references: [id], onDelete: Cascade, map: "Product_fkey")
 }
 
-model Basket {
+model Order {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) // วันที่สร้างคำสั่งซื้อ
+  updatedAt DateTime @updatedAt // วันที่แก้ไขล่าสุด
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  products Product[]
+  products Product[] // รายการสินค้าที่เชื่อมโยงกับคำสั่งซื้อ
 
-  order Order?
-}
+  borrowDate DateTime // วันที่เริ่มยืม
+  returnDate DateTime? // วันที่คืน (nullable เผื่อยังไม่มีกำหนดคืน)
 
-model Order {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  statusId Int
+  status   Status_Order @relation(fields: [statusId], references: [id])
 
-  basketId  Int        @unique
-  basket    Basket     @relation(fields: [basketId], references: [id])
   order_key Order_key?
 }
 
@@ -151,4 +145,10 @@ model Order_key {
 
   orderId Int   @unique
   order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Status_Order {
+  id          Int     @id @default(autoincrement())
+  status_name String
+  order       Order[]
 }
