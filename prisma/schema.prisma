@@ -70,6 +70,9 @@ model Product {
   product_model   Product_Model @relation(fields: [product_modelId], references: [id], map: "Product_Model_fkey", onDelete: Cascade)
 
   stockProductStatus Boolean @default(true) // true = in stock, false = borrowed
+
+  year_of_purchaseId Int
+  year_of_purchase   Year_of_purchase @relation(fields: [year_of_purchaseId], references: [id], map: "Product_Year_fkey", onDelete: Cascade)
 }
 
 model Image {
@@ -151,4 +154,10 @@ model Status_Order {
   id          Int     @id @default(autoincrement())
   status_name String
   order       Order[]
+}
+
+model Year_of_purchase {
+  id       Int       @id @default(autoincrement())
+  year     Int       @unique
+  products Product[] // 1 Year มีได้หลาย Product
 }

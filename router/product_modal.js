@@ -9,10 +9,10 @@ const {
   removeModal
 } = require("../controllers/modal_product_controllers");
 
-router.post("/createModel/:brandId", createModel);
+router.post("/createModel", createModel);
 router.put("/updataModel/:id", updataModel);
 router.get("/listBrandModal", listBrandModal);
-router.get("/listModal", listModal);
 router.delete("/removeModal/:id",removeModal)
+router.get("/listModal", listModal);
 
 module.exports = router;

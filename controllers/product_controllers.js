@@ -16,6 +16,7 @@ exports.createProduct = async (req, res) => {
       product_brandId,
       product_modelId,
       basketId,
+      year_of_purchaseId	
     } = req.body;
 
     const borrowStatusBoolean = borrowStatus === "true";
@@ -72,6 +73,9 @@ exports.createProduct = async (req, res) => {
           : undefined,
         images: {
           create: images,
+        },
+        year_of_purchase: {
+          connect: { id: parseInt(year_of_purchaseId) },
         },
       },
     });
